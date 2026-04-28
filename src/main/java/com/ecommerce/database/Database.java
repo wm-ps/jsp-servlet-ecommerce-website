@@ -7,7 +7,7 @@ public class Database {
     public Connection getConnection() {
         Connection conn;
         try {
-            conn = DriverManager.getConnection("jdbc:mysql://54.227.6.75:8044/ecommerce", "root", "wmPS#legacy");
+            conn = DriverManager.getConnection("jdbc:mysql://54.82.188.74:8024/jsp_servlet_ecommerce", "root", "SJP#WmE26DB");
             return conn;
         } catch (Exception e) {
             System.out.println(e.getMessage());
