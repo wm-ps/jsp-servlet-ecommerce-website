@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: legacy-code-ecommerce
+  namespace: stage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: legacy-code-ecommerce
+  template:
+    metadata:
+      labels:
+        app: legacy-code-ecommerce
+    spec:
+      containers:
+      - name: legacy-code-ecommerce
+        image: PLACEHOLDER_IMAGE
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "10m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+      imagePullSecrets:
+      - name: ecr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: legacy-code-ecommerce-service
+  namespace: stage
+spec:
+  selector:
+    app: legacy-code-ecommerce
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+

@@ -1,0 +1,76 @@
+pipeline {
+  agent any
+  tools {
+    maven 'maven-3.9.9'
+    nodejs 'node-22.11.0'
+    jdk 'java21'
+  }  // end of tool
+  environment {
+    AWS_REGION = 'us-east-1' //  do not chagne
+    ECR_REPO = 'poc-legacycode' //  do not change
+    IMAGE_TAG = "ecommerce-.${env.BUILD_NUMBER}"    // add  image name 
+    KUBECONFIG = credentials('kubeconfig-credential-id')  // Use SA token
+    K8S_PATH = 'ops/k8s'
+  
+  } // end of environment 
+
+  stages {
+
+  stage('Build Maven and Docker Image ') {
+    steps {
+        script {
+            withAWS(region: AWS_REGION, credentials: 'wm-ps-user-ecr') {
+                def awsAccountID = sh(returnStdout: true, script: "aws sts get-caller-identity --query Account --output text").trim()
+                
+                // Login to AWS ECR
+                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${awsAccountID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                
+                // Build Docker image
+                sh "docker buildx build --tag=${ECR_REPO}:${IMAGE_TAG} ."
+            }
+        }
+    }
+}
+
+
+    stage('Push to Docker Hub') {
+      steps {
+        script {
+          withAWS(region: AWS_REGION, credentials: 'wm-ps-user-ecr') {
+            def awsAccountID = sh(returnStdout: true, script: "aws sts get-caller-identity --query Account --output text").trim()
+            //def ecrLogin = sh(returnStdout: true, script: "aws ecr get-login --no-include-email --region ${AWS_REGION}")
+            //sh "${ecrLogin}"
+            // Login to AWS ECR
+                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${awsAccountID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+            
+            // Tag and push Docker image to ECR
+            sh "docker tag ${ECR_REPO}:${IMAGE_TAG} ${awsAccountID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
+            sh "docker push ${awsAccountID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
+          }
+        }
+      }
+    } // end of docker image push stage
+
+    stage('Deploy App') {
+            steps {
+              script {
+                withAWS(region: AWS_REGION, credentials: 'wm-ps-user-ecr') {
+                    def awsAccountID = sh(returnStdout: true, script: "aws sts get-caller-identity --query Account --output text").trim()
+                    def image = "${awsAccountID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
+
+                    // Update deployment.yaml dynamically
+                    sh """
+                        sed -i 's|image: .*|image: ${image}|' ${K8S_PATH}/deployment.yaml
+                        cat ${K8S_PATH}/deployment.yaml
+                    """
+
+                    // Apply updated deployment.yaml
+                    sh "kubectl apply -f ${K8S_PATH}/deployment.yaml"
+                    sh "kubectl apply -f ${K8S_PATH}/ingress.yaml"
+                }
+              }
+            }
+        }// end of deploy stage
+    
+  }
+}
