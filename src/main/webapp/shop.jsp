@@ -55,6 +55,7 @@
                                     <figure class="block-4-image">
                                         <a href="product-detail?id=${o.id}">
                                             <img src="data:image/jpg;base64,${o.base64Image}" alt="Image placeholder"
+                                                 onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/static/images/shoe.png';"
                                                  class="img-fluid" style="height: 100%">
                                         </a>
                                     </figure>

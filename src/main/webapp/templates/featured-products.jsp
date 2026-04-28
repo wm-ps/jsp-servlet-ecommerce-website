@@ -15,7 +15,9 @@
                             <div class="block-4 text-center">
                                 <figure class="block-4-image">
                                     <a href="product-detail?id=${o.id}">
-                                        <img src="data:image/jpg;base64,${o.base64Image}" alt="Image placeholder" class="img-fluid">
+                                        <img src="data:image/jpg;base64,${o.base64Image}" alt="Image placeholder"
+                                             onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/static/images/shoe.png';"
+                                             class="img-fluid">
                                     </a>
                                 </figure>
                                 <div class="block-4-text p-4">

@@ -41,6 +41,7 @@
                                 <tr>
                                     <td class="product-thumbnail">
                                         <img src="data:image/jpg;base64,${o.product.base64Image}" alt="Image"
+                                             onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/static/images/shoe.png';"
                                              class="img-fluid">
                                     </td>
 

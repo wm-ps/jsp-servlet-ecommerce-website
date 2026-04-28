@@ -122,7 +122,9 @@
 
                 <div class="col-md-5 ml-auto">
                     <div class="p-3 border">
-                        <img src="data:image/jpg;base64,${product.base64Image}" alt="image" width="100%">
+                        <img src="data:image/jpg;base64,${product.base64Image}" alt="image"
+                             onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/static/images/shoe.png';"
+                             width="100%">
                     </div>
                 </div>
             </div>

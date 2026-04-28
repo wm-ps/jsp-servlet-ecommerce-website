@@ -33,6 +33,7 @@
                                     <figure class="d-flex justify-content-center m-0">
                                         <c:if test="${account.base64Image != null}">
                                             <img class="icon" src="data:image/jpg;base64,${account.base64Image}"
+                                                 onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/static/images/blank_avatar.png';"
                                                  id="blah"
                                                  data-toggle="dropdown" alt="image"
                                                  style="width: 15em; height: 15em; border-radius: 50%;">

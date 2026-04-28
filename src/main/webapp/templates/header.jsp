@@ -26,6 +26,7 @@
                                 <li>
                                     <c:if test="${account.base64Image != null}">
                                         <img class="icon" src="data:image/jpg;base64,${account.base64Image}"
+                                             onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/static/images/blank_avatar.png';"
                                              id="dropdownMenuReference"
                                              data-toggle="dropdown" alt="image"
                                              style="width: 1.5em; border-radius: 50%; margin-right: 10px; margin-bottom: 10px">
