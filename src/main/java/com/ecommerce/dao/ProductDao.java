@@ -49,7 +49,7 @@ public class ProductDao {
     private List<Product> getListProductQuery(String query) {
         List<Product> list = new ArrayList<>();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
@@ -86,7 +86,7 @@ public class ProductDao {
         Product product = new Product();
         String query = "SELECT * FROM product WHERE product_id = " + productId;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
@@ -132,7 +132,7 @@ public class ProductDao {
 
         String query = "UPDATE product SET product_is_deleted = true WHERE product_id = " + productId;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.executeUpdate();
@@ -146,7 +146,7 @@ public class ProductDao {
         String query = "INSERT INTO product (product_name, product_image, product_price, product_description, fk_category_id, fk_account_id, product_is_deleted, product_amount) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, productName);
@@ -167,7 +167,7 @@ public class ProductDao {
     public void editProduct(int productId, String productName, InputStream productImage, double productPrice, String productDescription, int productCategory, int productAmount) {
         String query = "UPDATE product SET product_name = ?, product_image = ?, product_price = ?, product_description = ?, fk_category_id = ?, product_amount = ? WHERE product_id = ?";
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, productName);
@@ -194,7 +194,7 @@ public class ProductDao {
         int totalProduct = 0;
         String query = "SELECT COUNT(*) FROM product WHERE product_is_deleted = false";
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
@@ -211,7 +211,7 @@ public class ProductDao {
     public void decreaseProductAmount(int productId, int productAmount) {
         String query = "UPDATE product SET product_amount = product_amount - ? WHERE product_id = ?";
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, productAmount);

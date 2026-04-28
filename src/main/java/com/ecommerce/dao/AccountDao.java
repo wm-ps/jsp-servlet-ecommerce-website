@@ -33,7 +33,7 @@ public class AccountDao {
     private Account queryGetAccount(String query) {
         Account account = new Account();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
@@ -86,7 +86,7 @@ public class AccountDao {
     public void createAccount(String username, String password, InputStream image) {
         String query = "INSERT INTO account (account_name, account_password, account_image, account_is_seller, account_is_admin) VALUES (?, ?, ?, 0, 0)";
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, username);
@@ -109,7 +109,7 @@ public class AccountDao {
                 "account_image = ?" +
                 "WHERE account_id = ?";
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, firstName);
@@ -135,7 +135,7 @@ public class AccountDao {
                 "account_phone = ? " +
                 "WHERE account_id = ?";
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, firstName);

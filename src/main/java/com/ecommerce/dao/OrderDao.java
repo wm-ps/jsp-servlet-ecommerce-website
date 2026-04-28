@@ -33,7 +33,7 @@ public class OrderDao {
         String query = "SELECT order_id FROM `order` ORDER BY order_id DESC LIMIT 1";
         int orderId = 0;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
@@ -54,7 +54,7 @@ public class OrderDao {
         for (CartProduct cartProduct : cartProducts) {
             productDao.decreaseProductAmount(cartProduct.getProduct().getId(), cartProduct.getQuantity());
             try {
-                Class.forName("com.mysql.jdbc.Driver");
+                Class.forName("com.mysql.cj.jdbc.Driver");
                 preparedStatement = connection.prepareStatement(query);
                 preparedStatement.setInt(1, orderId);
                 preparedStatement.setInt(2, cartProduct.getProduct().getId());
@@ -73,7 +73,7 @@ public class OrderDao {
         connection = new Database().getConnection();
         String query = "INSERT INTO `order` (fk_account_id, order_total) VALUES (?, ?);";
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, accountId);
             preparedStatement.setDouble(2, totalPrice);
@@ -93,7 +93,7 @@ public class OrderDao {
         List<CartProduct> list = new ArrayList<>();
         String query = "SELECT * FROM order_detail WHERE fk_product_id = " + productId;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
@@ -116,7 +116,7 @@ public class OrderDao {
         List<Order> list = new ArrayList<>();
         String query = "SELECT * FROM `order` WHERE fk_account_id = " + accountId;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
@@ -139,7 +139,7 @@ public class OrderDao {
         List<CartProduct> list = new ArrayList<>();
         String query = "SELECT * FROM order_detail WHERE fk_order_id = " + orderId;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = new Database().getConnection();
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
