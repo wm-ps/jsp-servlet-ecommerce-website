@@ -21,3 +21,9 @@ out/
 # OS files
 .DS_Store
 Thumbs.db
+
+# JQAssistant (config + generated output)
+.jqassistant.yml
+jqassistant/
+**/jqassistant-report.*
+**/jqassistant/**

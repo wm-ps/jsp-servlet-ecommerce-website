@@ -14,10 +14,6 @@ import java.util.Base64;
 import java.util.List;
 
 public class ProductDao {
-    Connection connection = null;
-    PreparedStatement preparedStatement = null;
-    ResultSet resultSet = null;
-
     // Call DAO class to access other entities' database.
     AccountDao accountDao = new AccountDao();
     CategoryDao categoryDao = new CategoryDao();
@@ -48,11 +44,9 @@ public class ProductDao {
     // Method to execute query to get list products.
     private List<Product> getListProductQuery(String query) {
         List<Product> list = new ArrayList<>();
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
-            resultSet = preparedStatement.executeQuery();
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 int id = resultSet.getInt(1);
                 String name = resultSet.getString(2);
@@ -69,7 +63,7 @@ public class ProductDao {
 
                 list.add(new Product(id, name, base64Image, price, description, category, account, isDelete, amount));
             }
-        } catch (SQLException | ClassNotFoundException | IOException e) {
+        } catch (SQLException | IOException e) {
             System.out.println(e.getMessage());
         }
         return list;
@@ -85,11 +79,9 @@ public class ProductDao {
     public Product getProduct(int productId) {
         Product product = new Product();
         String query = "SELECT * FROM product WHERE product_id = " + productId;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
-            resultSet = preparedStatement.executeQuery();
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 product.setId(resultSet.getInt(1));
                 product.setName(resultSet.getString(2));
@@ -101,7 +93,7 @@ public class ProductDao {
                 product.setDeleted(resultSet.getBoolean(8));
                 product.setAmount(resultSet.getInt(9));
             }
-        } catch (SQLException | ClassNotFoundException | IOException e) {
+        } catch (SQLException | IOException e) {
             System.out.println(e.getMessage());
         }
         return product;
@@ -131,12 +123,10 @@ public class ProductDao {
         int productId = product.getId();
 
         String query = "UPDATE product SET product_is_deleted = true WHERE product_id = " + productId;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.executeUpdate();
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -145,10 +135,8 @@ public class ProductDao {
     public void addProduct(String productName, InputStream productImage, double productPrice, String productDescription, int productCategory, int sellerId, int productAmount) {
         String query = "INSERT INTO product (product_name, product_image, product_price, product_description, fk_category_id, fk_account_id, product_is_deleted, product_amount) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, productName);
             preparedStatement.setBinaryStream(2, productImage);
             preparedStatement.setDouble(3, productPrice);
@@ -158,7 +146,7 @@ public class ProductDao {
             preparedStatement.setBoolean(7, false);
             preparedStatement.setInt(8, productAmount);
             preparedStatement.executeUpdate();
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -166,10 +154,8 @@ public class ProductDao {
     // Method to edit product in database.
     public void editProduct(int productId, String productName, InputStream productImage, double productPrice, String productDescription, int productCategory, int productAmount) {
         String query = "UPDATE product SET product_name = ?, product_image = ?, product_price = ?, product_description = ?, fk_category_id = ?, product_amount = ? WHERE product_id = ?";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, productName);
             preparedStatement.setBinaryStream(2, productImage);
             preparedStatement.setDouble(3, productPrice);
@@ -178,7 +164,7 @@ public class ProductDao {
             preparedStatement.setInt(6, productId);
             preparedStatement.setInt(7, productAmount);
             preparedStatement.executeUpdate();
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -193,15 +179,13 @@ public class ProductDao {
     public int getTotalNumberOfProducts() {
         int totalProduct = 0;
         String query = "SELECT COUNT(*) FROM product WHERE product_is_deleted = false";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
-            resultSet = preparedStatement.executeQuery();
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
             if (resultSet.next()) {
                 totalProduct = resultSet.getInt(1);
             }
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return totalProduct;
@@ -210,14 +194,12 @@ public class ProductDao {
     // Method to decrease new amount of products.
     public void decreaseProductAmount(int productId, int productAmount) {
         String query = "UPDATE product SET product_amount = product_amount - ? WHERE product_id = ?";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, productAmount);
             preparedStatement.setInt(2, productId);
             preparedStatement.executeUpdate();
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }

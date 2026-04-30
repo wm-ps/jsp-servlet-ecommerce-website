@@ -37,6 +37,46 @@ Locally installed MySQL or a MySQL server.
 Compatible IDE, Intellij IDEA recommended for this project.
 ```
 
+## Run with Docker (Tomcat + MySQL)
+
+This repo includes a ready-to-run Docker setup that starts:
+
+- **MySQL** in Docker and auto-imports `Dump20210903.sql` (first run only)
+- **Tomcat** in Docker and deploys the app as `ROOT.war`
+
+### Prerequisites
+
+```
+Docker Desktop (or Docker Engine) with Docker Compose support.
+```
+
+### Start
+
+From the project root:
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+- **http://localhost:8080/**
+
+### Stop
+
+```bash
+docker compose down
+```
+
+### Reset DB (re-import SQL from scratch)
+
+If you want to delete the MySQL volume and re-run the import:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
 ### Installing
 
 For MySQL Database

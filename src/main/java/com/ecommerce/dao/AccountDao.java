@@ -10,10 +10,6 @@ import java.sql.*;
 import java.util.Base64;
 
 public class AccountDao {
-    Connection connection = null;
-    PreparedStatement preparedStatement = null;
-    ResultSet resultSet = null;
-
     // Method to get blob image from database.
     private String getBase64Image(Blob blob) throws SQLException, IOException {
         InputStream inputStream = blob.getBinaryStream();
@@ -32,11 +28,9 @@ public class AccountDao {
     // Method to execute get account query.
     private Account queryGetAccount(String query) {
         Account account = new Account();
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
-            resultSet = preparedStatement.executeQuery();
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
             if (resultSet.next()) {
                 account.setId(resultSet.getInt(1));
                 account.setUsername(resultSet.getString(2));
@@ -58,7 +52,7 @@ public class AccountDao {
 
                 return account;
             }
-        } catch (ClassNotFoundException | SQLException | IOException e) {
+        } catch (SQLException | IOException e) {
             System.out.println(e.getMessage());
         }
         return null;
@@ -85,15 +79,13 @@ public class AccountDao {
     // Method to create an account.
     public void createAccount(String username, String password, InputStream image) {
         String query = "INSERT INTO account (account_name, account_password, account_image, account_is_seller, account_is_admin) VALUES (?, ?, ?, 0, 0)";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, username);
             preparedStatement.setString(2, password);
             preparedStatement.setBinaryStream(3, image);
             preparedStatement.executeUpdate();
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -108,10 +100,8 @@ public class AccountDao {
                 "account_phone = ?, " +
                 "account_image = ?" +
                 "WHERE account_id = ?";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, firstName);
             preparedStatement.setString(2, lastName);
             preparedStatement.setString(3, address);
@@ -120,7 +110,7 @@ public class AccountDao {
             preparedStatement.setBinaryStream(6, image);
             preparedStatement.setInt(7, accountId);
             preparedStatement.executeUpdate();
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println("Update profile catch: " + e.getMessage());
         }
     }
@@ -134,10 +124,8 @@ public class AccountDao {
                 "account_email = ?, " +
                 "account_phone = ? " +
                 "WHERE account_id = ?";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = new Database().getConnection();
-            preparedStatement = connection.prepareStatement(query);
+        try (Connection connection = new Database().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, firstName);
             preparedStatement.setString(2, lastName);
             preparedStatement.setString(3, address);
@@ -145,7 +133,7 @@ public class AccountDao {
             preparedStatement.setString(5, phone);
             preparedStatement.setInt(6, accountId);
             preparedStatement.executeUpdate();
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println("Update profile catch: " + e.getMessage());
         }
     }
