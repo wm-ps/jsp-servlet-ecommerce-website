@@ -65,6 +65,7 @@ pipeline {
                     """
 
                     // Apply updated deployment.yaml
+                    sh "kubectl apply -f ${K8S_PATH}/secret.yaml"
                     sh "kubectl apply -f ${K8S_PATH}/deployment.yaml"
                     sh "kubectl apply -f ${K8S_PATH}/ingress.yaml"
                 }
