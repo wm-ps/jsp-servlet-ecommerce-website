@@ -19,6 +19,9 @@ spec:
         ports:
         - containerPort: 8080
         imagePullPolicy: Always
+        envFrom:
+        - secretRef:
+            name: legacy-code-ecommerce-secret
         resources:
           requests:
             memory: "64Mi"
@@ -38,8 +41,7 @@ spec:
   selector:
     app: legacy-code-ecommerce
   ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
   type: ClusterIP
-
