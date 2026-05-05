@@ -53,38 +53,24 @@ pipeline {
                         sh """
                             cd ${HELM_PATH}
                             
-                            # Get current version and create new version with build number
                             CURRENT_VERSION=\$(grep '^version:' Chart.yaml | awk '{print \$2}')
                             NEW_VERSION="\${CURRENT_VERSION}-${BUILD_NUMBER}"
                             
-                            # Update Chart.yaml version
                             sed -i "s/^version:.*/version: \${NEW_VERSION}/" Chart.yaml
                             
-                            # Create ECR repository if it doesn't exist
-                            aws ecr describe-repositories --repository-names ${HELM_REPO} --region ${AWS_REGION} || \
+                            # Create ECR repository using just the repo name (no chart appended)
+                            echo "Creating/verifying ECR repository: ${HELM_REPO}"
+                            aws ecr describe-repositories --repository-names ${HELM_REPO} --region ${AWS_REGION} 2>/dev/null || \\
                             aws ecr create-repository --repository-name ${HELM_REPO} --region ${AWS_REGION}
                             
-                            # Package the Helm chart
                             helm package .
+                            CHART_PACKAGE=\$(ls *.tgz | head -1)
                             
-                            # Get the packaged chart file
-                            CHART_PACKAGE=\$(ls *.tgz | grep "\${NEW_VERSION}")
-                            
-                            if [ -z "\$CHART_PACKAGE" ]; then
-                                echo "Error: Chart package not found!"
-                                exit 1
-                            fi
-                            
-                            echo "Found chart package: \$CHART_PACKAGE"
-                            
-                            # Login to ECR registry
-                            aws ecr get-login-password --region ${AWS_REGION} | \
+                            aws ecr get-login-password --region ${AWS_REGION} | \\
                             helm registry login --username AWS --password-stdin ${ecrUrl}
                             
-                            # Push Helm chart to ECR (separate repository)
+                            # Push to the repository root (Helm will handle the chart naming internally)
                             helm push \$CHART_PACKAGE oci://${ecrUrl}/${HELM_REPO}
-                            
-                            echo "Successfully pushed chart: \${CHART_PACKAGE} to oci://${ecrUrl}/${HELM_REPO}"
                         """
                     }
                 }
@@ -99,36 +85,22 @@ pipeline {
                         def ecrUrl = "${awsAccountID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
                         def image = "${ecrUrl}/${ECR_REPO}:${IMAGE_TAG}"
                         
-                        // Get the version for deployment
-                        def chartVersion = sh(script: """
-                            cd ${HELM_PATH}
-                            CURRENT_VERSION=\$(grep '^version:' Chart.yaml | awk '{print \$2}')
-                            echo "\${CURRENT_VERSION}-${BUILD_NUMBER}"
-                        """, returnStdout: true).trim()
-                        
                         sh """
-                            # Login to ECR registry
-                            aws ecr get-login-password --region ${AWS_REGION} | \
+                            aws ecr get-login-password --region ${AWS_REGION} | \\
                             helm registry login --username AWS --password-stdin ${ecrUrl}
                             
-                            # Deploy or upgrade the Helm release
                             helm upgrade --install ${RELEASE_NAME} \\
                             oci://${ecrUrl}/${HELM_REPO} \\
                             --namespace ${NAMESPACE} \\
                             --set app.image=${image} \\
-                            --version ${chartVersion} \\
-                            --wait \\
-                            --timeout 5m \\
-                            --create-namespace
-                            
-                            echo "Helm deployment completed successfully"
+                            --wait
                         """
                     }
                 }
             }
         }
-    }
-    
+    }  // Closing brace for stages
+
     post {
         always {
             script {
@@ -150,4 +122,4 @@ pipeline {
             // Add notification logic here (Slack, Email, etc.)
         }
     }
-}
+}  // Closing brace for pipeline
