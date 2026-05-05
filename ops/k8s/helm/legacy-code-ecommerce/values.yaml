@@ -1,0 +1,39 @@
+namespace: stage
+
+app:
+  name: legacy-code-ecommerce
+  image: PLACEHOLDER_IMAGE
+  port: 8080
+
+replicaCount: 1
+
+imagePullSecrets:
+  - name: ecr-secret
+
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "10m"
+  limits:
+    memory: "1Gi"
+    cpu: "1"
+
+secret:
+  name: legacy-code-ecommerce-secret
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: alb
+  host: shopbit.onwavemaker.com
+
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/group.name: ps-team-app-stage-alb
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
