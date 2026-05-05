@@ -10,10 +10,10 @@ pipeline {
     environment {
         AWS_REGION   = 'us-east-1'
         ECR_REPO     = 'poc-legacycode'                       // Docker image repository
-        HELM_REPO    = 'poc-helm-legacy-code-ecommerce'       // Helm chart repository (separate per chart)
+        HELM_REPO    = 'poc-helm-legacy-code-ecommerce'       // Helm chart repository (matches chart name)
         
-        APP_NAME     = 'legacy-code-ecommerce'                // Chart name (must match Chart.yaml name)
-        RELEASE_NAME = 'ecommerce'                            // Helm release name
+        APP_NAME     = 'poc-helm-legacy-code-ecommerce'       // Updated to match chart name
+        RELEASE_NAME = 'ecommerce'                            // Helm release name (can stay same)
         NAMESPACE    = 'stage'                                // Kubernetes namespace
         
         IMAGE_TAG    = "ecommerce-${env.BUILD_NUMBER}"
@@ -53,24 +53,44 @@ pipeline {
                         sh """
                             cd ${HELM_PATH}
                             
+                            # Update chart name in Chart.yaml if not already set
+                            CURRENT_NAME=\$(grep '^name:' Chart.yaml | awk '{print \$2}')
+                            if [ "\$CURRENT_NAME" != "${HELM_REPO}" ]; then
+                                echo "Updating chart name from \$CURRENT_NAME to ${HELM_REPO}"
+                                sed -i "s/^name:.*/name: ${HELM_REPO}/" Chart.yaml
+                            fi
+                            
                             CURRENT_VERSION=\$(grep '^version:' Chart.yaml | awk '{print \$2}')
                             NEW_VERSION="\${CURRENT_VERSION}-${BUILD_NUMBER}"
                             
                             sed -i "s/^version:.*/version: \${NEW_VERSION}/" Chart.yaml
                             
-                            # Create ECR repository using just the repo name (no chart appended)
+                            # Create ECR repository
                             echo "Creating/verifying ECR repository: ${HELM_REPO}"
                             aws ecr describe-repositories --repository-names ${HELM_REPO} --region ${AWS_REGION} 2>/dev/null || \\
                             aws ecr create-repository --repository-name ${HELM_REPO} --region ${AWS_REGION}
                             
+                            # Package the chart
                             helm package .
+                            
                             CHART_PACKAGE=\$(ls *.tgz | head -1)
                             
+                            if [ -z "\$CHART_PACKAGE" ]; then
+                                echo "Error: Chart package not found!"
+                                exit 1
+                            fi
+                            
+                            echo "Chart package: \$CHART_PACKAGE"
+                            
+                            # Login to ECR
                             aws ecr get-login-password --region ${AWS_REGION} | \\
                             helm registry login --username AWS --password-stdin ${ecrUrl}
                             
-                            # Push to the repository root (Helm will handle the chart naming internally)
+                            # Push to ECR - path will be ${HELM_REPO}/${HELM_REPO} (same name, no extra nesting)
+                            echo "Pushing to oci://${ecrUrl}/${HELM_REPO}"
                             helm push \$CHART_PACKAGE oci://${ecrUrl}/${HELM_REPO}
+                            
+                            echo "Successfully pushed chart: \$CHART_PACKAGE"
                         """
                     }
                 }
@@ -85,26 +105,38 @@ pipeline {
                         def ecrUrl = "${awsAccountID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
                         def image = "${ecrUrl}/${ECR_REPO}:${IMAGE_TAG}"
                         
+                        // Get the chart version
+                        def chartVersion = sh(script: """
+                            cd ${HELM_PATH}
+                            grep '^version:' Chart.yaml | awk '{print \$2}'
+                        """, returnStdout: true).trim()
+                        def fullVersion = "${chartVersion}-${env.BUILD_NUMBER}"
+                        
                         sh """
                             aws ecr get-login-password --region ${AWS_REGION} | \\
                             helm registry login --username AWS --password-stdin ${ecrUrl}
                             
+                            # Deploy using the OCI repository
                             helm upgrade --install ${RELEASE_NAME} \\
                             oci://${ecrUrl}/${HELM_REPO} \\
+                            --version ${fullVersion} \\
                             --namespace ${NAMESPACE} \\
                             --set app.image=${image} \\
-                            --wait
+                            --create-namespace \\
+                            --wait \\
+                            --timeout 5m
+                            
+                            echo "Helm deployment successful"
                         """
                     }
                 }
             }
         }
-    }  // Closing brace for stages
+    }
 
     post {
         always {
             script {
-                // Clean up old chart packages
                 sh """
                     cd ${HELM_PATH}
                     rm -f *.tgz || true
@@ -119,7 +151,6 @@ pipeline {
         
         failure {
             echo "Pipeline failed for build ${env.BUILD_NUMBER}"
-            // Add notification logic here (Slack, Email, etc.)
         }
     }
-}  // Closing brace for pipeline
+}
