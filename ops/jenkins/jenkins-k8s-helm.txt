@@ -78,7 +78,7 @@ stage('Package & Push Helm Chart') {
         aws ecr get-login-password --region ${AWS_REGION} | \\
         helm registry login --username AWS --password-stdin ${ecrUrl}
 
-        helm push \$CHART_PACKAGE oci://${ecrUrl}/${HELM_REPO}
+        helm push \$CHART_PACKAGE oci://${ecrUrl}/${HELM_REPO}/${APP_NAME}
         """
       }
     }
