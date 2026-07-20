@@ -40,7 +40,6 @@
                                     </c:if>
 
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuReference">
-                                        <a class="dropdown-item" href="profile-page">Your profile</a>
                                         <a class="dropdown-item" href="logout">Logout</a>
                                     </div>
                                 </li>
@@ -49,16 +48,6 @@
                             <c:if test="${sessionScope.account == null}">
                                 <li><a href="login"><span class="icon icon-person"></span></a></li>
                             </c:if>
-
-                            <li>
-                                <a href="../cart.jsp" class="site-cart">
-                                    <span class="icon icon-shopping_cart"></span>
-
-                                    <c:if test="${order.cartProducts.size() != null}">
-                                        <span class="count">${order.cartProducts.size()}</span>
-                                    </c:if>
-                                </a>
-                            </li>
 
                             <li class="d-inline-block d-md-none ml-md-0">
                                 <a href="#" class="site-menu-toggle js-menu-toggle">
@@ -76,21 +65,14 @@
         <div class="container">
             <ul class="site-menu js-clone-nav d-none d-md-block" style="padding: 0">
                 <li class="${home_active}"><a href="/">Home</a></li>
-                <li class="${about_active}"><a href="../about.jsp">About</a></li>
                 <li class="${shop_active}"><a href="shop">Shop</a></li>
-                <li class="${contact_active}"><a href="../contact.jsp">Contact</a></li>
-
-                <c:if test="${sessionScope.account != null}">
-                    <li class="${order_history_active}"><a href="order-history">Orders history</a></li>
-                </c:if>
 
                 <c:if test="${sessionScope.account.isSeller == 1}">
-                    <li class="${product_management_active}"><a href="product-management">Products management</a></li>
-                    <li class="${order_management_active}"><a href="order-management">Orders management</a></li>
+                    <li><a href="#" onclick="return false;">Product management</a></li>
                 </c:if>
 
                 <c:if test="${sessionScope.account.isAdmin == 1}">
-                    <li class="${websitem_active}"><a href="#">Website management</a></li>
+                    <li><a href="#" onclick="return false;">Users management</a></li>
                 </c:if>
             </ul>
         </div>

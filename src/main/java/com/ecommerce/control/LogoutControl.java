@@ -15,6 +15,8 @@ public class LogoutControl extends HttpServlet {
 
         // Remove cookies.
         Cookie[] cookies = request.getCookies();
+        // getCookies() returns null when the request has no cookies.
+        if (cookies == null) cookies = new Cookie[0];
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("username")) {
                 cookie.setMaxAge(0);
