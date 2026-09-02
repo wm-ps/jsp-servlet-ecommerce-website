@@ -17,6 +17,10 @@ public class LoginControl extends HttpServlet {
         // Get list cookies of the browser.
         Cookie[] cookies = request.getCookies();
 
+        if (cookies == null) {
+            return null;
+        }
+
         Account account;
         String username = "";
         String password = "";
