@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+    <class name="com.ecommerce.entity.Order" table="`order`">
+        <id name="id" type="int" column="order_id">
+            <generator class="native" />
+        </id>
+        <many-to-one name="account" class="com.ecommerce.entity.Account"
+                     column="fk_account_id" fetch="join" lazy="false" />
+        <property name="total" type="float" column="order_total" />
+        <property name="dateCreate" type="timestamp" column="order_date_create"
+                  insert="false" update="false" generated="insert" />
+        <bag name="details" table="order_detail" inverse="false" lazy="true" cascade="all-delete-orphan">
+            <key column="fk_order_id" />
+            <composite-element class="com.ecommerce.entity.OrderDetail">
+                <many-to-one name="product" class="com.ecommerce.entity.Product"
+                             column="fk_product_id" lazy="false" />
+                <property name="quantity" type="int" column="product_quantity" />
+                <property name="price" type="float" column="product_price" />
+            </composite-element>
+        </bag>
+    </class>
+</hibernate-mapping>

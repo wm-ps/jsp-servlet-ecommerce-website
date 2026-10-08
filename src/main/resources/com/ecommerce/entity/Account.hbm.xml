@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+    <class name="com.ecommerce.entity.Account" table="account">
+        <id name="id" type="int" column="account_id">
+            <generator class="native" />
+        </id>
+        <property name="username" type="string" column="account_name" />
+        <property name="password" type="string" column="account_password" />
+        <property name="isSeller" type="int" column="account_is_seller" />
+        <property name="isAdmin" type="int" column="account_is_admin" />
+        <property name="image" type="binary" column="account_image" length="2147483647" />
+        <property name="address" type="string" column="account_address" />
+        <property name="firstName" type="string" column="account_first_name" />
+        <property name="lastName" type="string" column="account_last_name" />
+        <property name="email" type="string" column="account_email" />
+        <property name="phone" type="string" column="account_phone" length="10" />
+    </class>
+</hibernate-mapping>
